@@ -5,10 +5,18 @@
 
 #include <Wire.h>
 
+const int pressureInput = A0;
+const int pressureZero = 102.4;
+const int pressureMax = 921.6;
+const int pressuretransducermaxPSI = 100;
+const int sensorreadDelay = 250;
+
+float pressureValue = 0;
 
 const int cameraTriggerPin = 6;
 Adafruit_BMP085 bmp;
-
+float x_acceleration = 0;
+int going = 0;
 Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified();
 
 /*
@@ -32,10 +40,17 @@ all the while printing out the bmp data.
 */
 void loop() {
   float a = getYAcceleration();
-  // printData();
-  while(a>5.00) {
+  printData();
+  readWaterSensor();
+  while(a>2.00) {
     startCamera();
-    // printData();
+    printData();
+    readWaterSensor();
+    a = getYAcceleration();
+  }
+  if (going == 1) {
+    delay(100);
+    endCamera();
   }
 }
 /*
@@ -43,12 +58,14 @@ Given that the same signal is used to start and end the recording from the camer
 which will send this signal.
 */
 void startCamera() {
+  going = 1;
   signal();
 }
 /*
 The endCamera() function is exactly the same as the startCamera, but we use it for increased organization and clarity
 */
 void endCamera() {
+  going = 0;
   signal();
 }
 /*
@@ -66,36 +83,38 @@ Gets the y acceleration by using the adafruits library.
 float getYAcceleration() {
   sensors_event_t event;
   accel.getEvent(&event);
-  Serial.print("accelaration in y_direction: ");
+  Serial.print("accelaration in x_direction:");
+  Serial.println(event.acceleration.x);
+  Serial.print("acceleration in y_direction:");
   Serial.println(event.acceleration.y);
-  return event.acceleration.y;
+  Serial.print("acceleration in z_direction:");
+  Serial.println(event.acceleration.z);
+  return event.acceleration.x;
 }
 /*
 This is called to to print the data recorded by the bmp.
 */
 void printData() {
   // for the pressure and temperature sensor
-  Serial.print("Temperature = ");
+  Serial.print("Temperature:");
   Serial.print(bmp.readTemperature());
   Serial.println(" *C");
     
-  Serial.print("Pressure = ");
+  Serial.print("Pressure:");
   Serial.print(bmp.readPressure());
   Serial.println(" Pa");
 
-  Serial.print("Altitude = ");
-  Serial.print(bmp.readAltitude());
-  Serial.println(" meters");
-
-  Serial.print("Pressure at sealevel (calculated) = ");
-  Serial.print(bmp.readSealevelPressure());
-  Serial.println(" Pa");
-
-  Serial.print("Real altitude = ");
-  Serial.print(bmp.readAltitude(seaLevelPressure_hPa * 100));
-  Serial.println(" meters");
-
   // use delay 1 for every 10 ms as stated by maddy 
   Serial.println();
-  delay(500);
+}
+
+void readWaterSensor() {
+  pressureValue = analogRead(pressureInput);
+  Serial.print("pressure value:");
+  Serial.println(pressureValue);
+  pressureValue = ((pressureValue-pressureZero)*pressuretransducermaxPSI)/(pressureMax-pressureZero);
+  Serial.print("WaterPressure:");
+  Serial.print(pressureValue);
+  Serial.println("psi");
+  delay(250);
 }
