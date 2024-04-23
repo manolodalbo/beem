@@ -6,7 +6,7 @@
 #include <Wire.h>
 
 const int pressureInput = A0;
-const int pressureZero = 102.4;
+const int pressureZero = 96.4;
 const int pressureMax = 921.6;
 const int pressuretransducermaxPSI = 100;
 const int sensorreadDelay = 250;
@@ -24,15 +24,15 @@ The setup method sets up both the bmp and accelerometer and also indicates the s
 */
 void setup() {
   Serial.begin(9600);
-  pinMode(cameraTriggerPin,OUTPUT);
-  if (!accel.begin()) {
-    Serial.println("No accelerometer detected");
-    while(1){}
-  }
-  if (!bmp.begin()) {
-  Serial.println("Could not find a valid BMP085 sensor, check wiring!");
-  while (1) {}
-  }
+  // pinMode(cameraTriggerPin,OUTPUT);
+  // if (!accel.begin()) {
+  //   Serial.println("No accelerometer detected");
+  //   while(1){}
+  // }
+  // if (!bmp.begin()) {
+  // Serial.println("Could not find a valid BMP085 sensor, check wiring!");
+  // while (1) {}
+  // }
 }
 /*
 The loop gets the acceleration and if the acceleration is over a certain value than it stays in the loop
@@ -41,7 +41,8 @@ all the while printing out the bmp data.
 void loop() {
   float a = getYAcceleration();
   printData();
-  readWaterSensor();
+  // readWaterSensor();
+  delay(100);
   while(a>2.00) {
     startCamera();
     printData();
@@ -83,11 +84,11 @@ Gets the y acceleration by using the adafruits library.
 float getYAcceleration() {
   sensors_event_t event;
   accel.getEvent(&event);
-  Serial.print("accelaration in x_direction:");
+  Serial.print("a_x:");
   Serial.println(event.acceleration.x);
-  Serial.print("acceleration in y_direction:");
+  Serial.print("a_y:");
   Serial.println(event.acceleration.y);
-  Serial.print("acceleration in z_direction:");
+  Serial.print("a_z:");
   Serial.println(event.acceleration.z);
   return event.acceleration.x;
 }
@@ -109,7 +110,7 @@ void printData() {
 }
 
 void readWaterSensor() {
-  pressureValue = analogRead(pressureInput);
+  pressureValue = analogRead(A0);
   Serial.print("pressure value:");
   Serial.println(pressureValue);
   pressureValue = ((pressureValue-pressureZero)*pressuretransducermaxPSI)/(pressureMax-pressureZero);
