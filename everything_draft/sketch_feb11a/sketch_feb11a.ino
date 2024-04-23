@@ -1,7 +1,8 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_ADXL345_U.h>
 #include <Adafruit_BMP085.h>
-#define seaLevelPressure_hPa 1013.25
+#include <SPI.h>
+#include <SD.h>
 
 #include <Wire.h>
 
@@ -10,6 +11,8 @@ const int pressureZero = 96.4;
 const int pressureMax = 921.6;
 const int pressuretransducermaxPSI = 100;
 const int sensorreadDelay = 250;
+
+File dataFile; 
 
 float pressureValue = 0;
 
@@ -24,6 +27,19 @@ The setup method sets up both the bmp and accelerometer and also indicates the s
 */
 void setup() {
   Serial.begin(9600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+
+
+  Serial.print("Initializing SD card...");
+
+  if (!SD.begin(4)) {
+    Serial.println("initialization failed!");
+    while (1);
+  }
+  Serial.println("initialization done.");
+
   // pinMode(cameraTriggerPin,OUTPUT);
   // if (!accel.begin()) {
   //   Serial.println("No accelerometer detected");
@@ -33,6 +49,19 @@ void setup() {
   // Serial.println("Could not find a valid BMP085 sensor, check wiring!");
   // while (1) {}
   // }
+
+  String filename = createFilename();
+    // Open the file for writing
+   dataFile = SD.open(filename, FILE_WRITE);
+
+    // If the file is available, write to it
+    if (dataFile) {
+        Serial.print("Data will be written to file: ");
+        Serial.println(filename);
+        dataFile.close();
+    } else {
+        Serial.println("Error opening data file");
+    }
 }
 /*
 The loop gets the acceleration and if the acceleration is over a certain value than it stays in the loop
@@ -118,4 +147,44 @@ void readWaterSensor() {
   Serial.print(pressureValue);
   Serial.println("psi");
   delay(250);
+}
+
+void writeDataToSD(String data) {
+    // Create a unique filename based on current timestamp
+    String filename = createFilename();
+    // Open the file for writing
+    File dataFile = SD.open(filename, FILE_WRITE);
+
+    // If the file is available, write to it
+    if (dataFile) {
+        dataFile.println(data);
+        dataFile.close();
+        Serial.println("Data written to file: " + filename);
+    } else {
+        Serial.println("Error opening data file");
+    }
+}
+
+String createFilename() {
+    // Get current timestamp
+    unsigned long currentMillis = millis();
+    unsigned long seconds = currentMillis / 1000;
+    unsigned long minutes = seconds / 60;
+    unsigned long hours = minutes / 60;
+    unsigned long days = hours / 24;
+    unsigned long years = days / 365;
+    // Construct filename with timestamp
+    String filename = "Data_";
+    filename += years;
+    filename += "-";
+    filename += days % 365;
+    filename += "_";
+    filename += hours % 24;
+    filename += "-";
+    filename += minutes % 60;
+    filename += "-";
+    filename += seconds % 60;
+    filename += ".csv";
+
+    return filename;
 }
