@@ -5,6 +5,7 @@
 #include <SD.h>
 
 #include <Wire.h>
+#include <floatToString.h>
 
 const int pressureInput = A0;
 const int pressureZero = 96.4;
@@ -52,12 +53,13 @@ void setup() {
 
   String filename = createFilename();
     // Open the file for writing
-   dataFile = SD.open(filename, FILE_WRITE);
+    
+   dataFile = SD.open("test.csv", FILE_WRITE);
 
     // If the file is available, write to it
     if (dataFile) {
         Serial.print("Data will be written to file: ");
-        Serial.println(filename);
+        Serial.println("test.csv");
         dataFile.close();
     } else {
         Serial.println("Error opening data file");
@@ -144,7 +146,7 @@ void readWaterSensor() {
   Serial.println(pressureValue);
   pressureValue = ((pressureValue-pressureZero)*pressuretransducermaxPSI)/(pressureMax-pressureZero);
   Serial.print("WaterPressure:");
-  Serial.print(pressureValue);
+  writeDataToSD(String(pressureValue));
   Serial.println("psi");
   delay(250);
 }
@@ -153,7 +155,7 @@ void writeDataToSD(String data) {
     // Create a unique filename based on current timestamp
     String filename = createFilename();
     // Open the file for writing
-    File dataFile = SD.open(filename, FILE_WRITE);
+    File dataFile = SD.open("test.csv", FILE_WRITE);
 
     // If the file is available, write to it
     if (dataFile) {
