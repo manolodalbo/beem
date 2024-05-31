@@ -39,20 +39,20 @@ The loop gets the acceleration and if the acceleration is over a certain value t
 all the while printing out the bmp data.
 */
 void loop() {
-  float a = getYAcceleration();
-  printData();
-  // readWaterSensor();
-  delay(100);
-  while(a>2.00) {
-    startCamera();
-    printData();
-    readWaterSensor();
-    a = getYAcceleration();
-  }
-  if (going == 1) {
-    delay(100);
-    endCamera();
-  }
+  // float a = getYAcceleration();
+  // printData();
+  readWaterSensor();
+  // delay(100);
+  // while(a>2.00) {
+  //   startCamera();
+  //   printData();
+  //   readWaterSensor();
+  //   a = getYAcceleration();
+  // }
+  // if (going == 1) {
+  //   delay(100);
+  //   endCamera();
+  // }
 }
 /*
 Given that the same signal is used to start and end the recording from the camera, we simply call the signal method
