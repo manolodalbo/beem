@@ -160,6 +160,7 @@ void readWaterSensor() {
   pressureValue = analogRead(A0);
   pressureValue = ((pressureValue-pressureZero)*pressuretransducermaxPSI)/(pressureMax-pressureZero);
   writeDataToSD(String(getTimeStamp() + "," + "pressure value: " + pressureValue));// in psi
+  writeDataToSD(String("")) // write an empty line after every recording
 }
 
 void writeDataToSD(String data) {
